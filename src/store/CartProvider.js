@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useReducer, useEffect } from 'react';
 
 import CartContext from "./cart-contex";
 
@@ -8,6 +8,7 @@ const defaultCartState = {
 }
 
 const cartReducer = (state, action) => {
+    console.log(state)
     if (action.type === 'ADD') {
         const updatedTotalAmount = state.totalAmount + action.item.price * action.item.amount;
 
@@ -31,6 +32,30 @@ const cartReducer = (state, action) => {
             updatedItems = state.items.concat(action.item);
         }
 
+        if (action.type === 'REMOVE') {
+
+            const existingCartItemIndex = state.items.findIndex((item) => item.id === action.id);
+            console.log(existingCartItemIndex);
+            const existingItem = state.items[existingCartItemIndex];
+            const updatedTotalAmount = state.totalAmount - existingItem.price;
+            let updatedItems;
+            if (existingItem.amount === 1) {
+                updatedItems = state.items.filter(item => item.id !== action.id)
+            } else {
+                const updatedItem = { ...existingItem, amount: existingItem.amount - 1 };
+                updatedItems = [...state.items];
+                updatedItems[existingCartItemIndex] = updatedItem;
+
+                console.log(updatedItems);
+            }
+
+            return {
+                items: updatedItems,
+                totalAmount: updatedTotalAmount,
+            }
+
+        }
+
         return {
             items: updatedItems,
             totalAmount: updatedTotalAmount
@@ -38,7 +63,9 @@ const cartReducer = (state, action) => {
         }
 
     }
-    return defaultCartState
+    return defaultCartState;
+
+
 };
 
 const CartProvider = props => {
